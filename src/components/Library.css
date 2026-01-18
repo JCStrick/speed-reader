@@ -1,0 +1,115 @@
+.library {
+  padding: 1.5rem;
+  background: var(--surface-color, #1a1a1a);
+  border-radius: 12px;
+}
+
+.library h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-muted, #888);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.library-empty {
+  text-align: center;
+}
+
+.library-empty p {
+  margin: 0;
+  color: var(--text-muted, #666);
+}
+
+.library-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.library-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: var(--card-bg, #222);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.library-item:hover {
+  background: var(--card-hover, #2a2a2a);
+}
+
+.library-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.library-item-info h4 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-color, #fff);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.library-item-meta {
+  font-size: 0.75rem;
+  color: var(--text-muted, #888);
+}
+
+.library-item-progress {
+  height: 4px;
+  background: var(--track-bg, #333);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.library-item-progress-bar {
+  height: 100%;
+  background: var(--orp-color, #ff4444);
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+
+.library-item-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.library-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.library-btn-resume {
+  flex: 1;
+  background: var(--button-bg, #333);
+  color: var(--text-color, #fff);
+}
+
+.library-btn-resume:hover {
+  background: var(--button-hover, #444);
+}
+
+.library-btn-delete {
+  width: 36px;
+  background: transparent;
+  color: var(--text-muted, #666);
+}
+
+.library-btn-delete:hover {
+  background: rgba(255, 68, 68, 0.2);
+  color: var(--orp-color, #ff4444);
+}

@@ -1,0 +1,132 @@
+Focus Reader Web Application SpecificationOverviewThe Focus Reader is a web-based application designed to enable users to read documents or articles using Rapid Serial Visual Presentation (RSVP) with Optimal Recognition Point (ORP) highlighting. This method presents text one word at a time in the center of the screen, with a key letter (the ORP) highlighted in red to minimize eye movement and facilitate high-speed reading. The app supports pasting text, uploading PDFs or other documents, adjustable reading speeds, auto-speed ramp-up, full-screen mode, and a library for managing multiple documents with progress tracking. The goal is to create an immersive, distraction-free reading experience that allows users to consume content at speeds ranging from 200 to 1000+ words per minute (WPM).This specification is structured to provide a complete blueprint for building the application using modern web technologies. It includes user stories, UI/UX design, functional requirements, technical architecture, and implementation guidance. An LLM or developer can use this to generate code for a fully functional web app, deployable on platforms like GitHub Pages.User StoriesAs a user, I want to paste text from an article or document so I can quickly start reading in focus mode.
+As a user, I want to upload PDFs or text files so I can read longer documents without manual copying.
+As a user, I want to adjust the reading speed (WPM) manually to match my comfort level.
+As a user, I want an auto mode that gradually increases speed from a minimum to a maximum WPM to help me build reading stamina without abrupt changes.
+As a user, I want to pause, resume, rewind, or fast-forward through the text for better control.
+As a user, I want a full-screen mode to eliminate distractions and immerse myself in the reading.
+As a user, I want a library to store multiple documents, track reading progress (e.g., percentage completed), and resume from where I left off.
+As a user, I want customizable themes (e.g., colors for background, text, and ORP highlight) to personalize the experience.
+As a user, I want the app to handle punctuation intelligently, such as longer pauses for periods, commas, or paragraphs.
+
+UI/UX DesignOverall LayoutTheme: Dark mode by default (black background, white text, red ORP highlight) for reduced eye strain. Use CSS variables for easy theming.
+Structure:Header: App title "Focus Reader" with subtle navigation (e.g., settings icon for theme customization).
+Input Section: Textarea for pasting text, file upload button (supporting PDF, TXT, etc.), and a "Start Reading" button.
+Controls Section: Visible before and during reading:Play/Pause button.
+Speed slider (range: 200-1000 WPM, default 300).
+Auto mode toggle with min/max WPM inputs (e.g., min 300, max 800).
+Progress bar showing current position in the document.
+Rewind/Forward buttons (e.g., skip 10 words back/forward).
+Full-screen toggle.
+
+Reading Area: Large central div where words are displayed one at a time. The word is centered horizontally and vertically, with the ORP letter in red and bold. Font size scalable based on word length.
+Library Section: Bottom panel showing a list of uploaded/pasted documents as cards, each with title, progress bar, resume button, and delete option.
+
+Responsive Design: Mobile-friendly, with touch controls for play/pause. Reading area takes full viewport in full-screen.
+Animations: Smooth fade-in/out for each word transition. No distracting effects.
+
+Key Visual ElementsWord Display: Each word is split to highlight the ORP (e.g., for "balance", "b" in normal, "a" in red, "lance" in normal). Position the red letter at a fixed horizontal point (e.g., 40% from left) to guide the eye.
+Punctuation Handling: Attach punctuation to the previous word (e.g., "word."). Increase delay for sentence ends (e.g., 2x normal interval for periods).
+Progress Tracking: Local storage for library items, including current word index and completion percentage.
+
+Functional RequirementsText Input and ProcessingPaste Text: Accept raw text input, clean it (remove extra spaces, normalize line breaks), and split into words.
+Upload Documents:Support PDF (extract text using pdf.js library).
+Support TXT, DOCX (use FileReader for TXT; for DOCX, use mammoth.js or similar).
+Automatically generate a title from filename or first line.
+
+Word Splitting and ORP Calculation:Split text into words using regex (e.g., /\b\w+\b/g), preserving punctuation.
+For each word, determine ORP:Length 1: Position 0.
+Length 2-3: Position 1.
+Length 4-7: Position 2.
+Length 8+: Position 3 or Math.floor(length / 3).
+
+Render word as: left part (normal) + ORP (red, bold) + right part (normal).
+
+Reading EngineRSVP Playback:Use setInterval to display words at calculated intervals: (60 / WPM) * 1000 ms per word.
+Adjust interval for longer words or punctuation (e.g., +100ms for words >10 chars, +300ms for periods).
+
+Auto Mode:Start at min WPM, incrementally increase to max WPM over the document (e.g., add 10 WPM every 50 words).
+Smooth transition to avoid jarring changes.
+
+Controls:Pause/Resume: Stop/start the interval timer.
+Speed Change: Dynamically update interval on slider drag.
+Navigation: Jump to specific word index.
+
+Full-Screen: Use browser Fullscreen API to expand reading area.
+
+Library ManagementStorage: Use localStorage or IndexedDB to persist documents, including text, title, current index, and timestamp.
+Features:Add new document on upload/paste.
+Display as list with progress (current index / total words * 100%).
+Resume: Load text and start from saved index.
+Delete: Remove from storage.
+
+Edge CasesHandle empty input, very short/long texts.
+Error handling for invalid uploads (e.g., non-PDF files).
+Accessibility: Keyboard shortcuts (space for play/pause, arrows for speed adjust).
+Performance: For large documents (>100k words), process in chunks to avoid lag.
+
+Technical ArchitectureTechnologiesFrontend Framework: Vanilla JavaScript for simplicity, or React.js for better state management (recommended for scalability).
+Libraries:pdf.js for PDF text extraction.
+mammoth.js for DOCX (optional).
+No backend needed; all client-side.
+
+Build/Deployment: Use Vite or Parcel for bundling. Deploy to GitHub Pages.
+State Management: If using React, use useState/useEffect. For vanilla, global variables or a simple store.
+
+Core Components (If Using React)App.js: Root component handling routing (if multi-page) or state.
+InputForm.js: Handles paste/upload, text extraction.
+Reader.js: Displays words, manages timer and controls.
+Library.js: Lists stored documents.
+Settings.js: Theme customization.
+
+Implementation StepsSetup Project: Initialize with npm init, install dependencies (pdf.js, etc.).
+Text Extraction:For PDF: Load with pdf.js, iterate pages, extract textContent.
+Clean text: Remove hyphens, multiple spaces.
+
+ORP Logic:javascript
+
+function getORP(word) {
+  const len = word.length;
+  let pos = 0;
+  if (len <= 1) pos = 0;
+  else if (len <= 3) pos = 1;
+  else if (len <= 7) pos = 2;
+  else pos = Math.floor(len / 3);
+  return {
+    left: word.slice(0, pos),
+    orp: word[pos],
+    right: word.slice(pos + 1)
+  };
+}
+
+Render as: <span>${left}</span><span class="orp">${orp}</span><span>${right}</span>
+
+Playback Timer:javascript
+
+let timer;
+function startReading(words, index, wpm) {
+  const interval = 60000 / wpm;
+  timer = setInterval(() => {
+    if (index >= words.length) clearInterval(timer);
+    displayWord(words[index]);
+    index++;
+  }, interval);
+}
+
+Auto Mode Extension: Dynamically adjust wpm in the interval callback.
+Storage:javascript
+
+localStorage.setItem('library', JSON.stringify(docs));
+
+Full-Screen:javascript
+
+document.documentElement.requestFullscreen();
+
+Testing: Unit tests for ORP calc, integration tests for playback.
+
+Additional EnhancementsIntegration with web articles: Allow URL input to fetch and parse text (use fetch and readability.js).
+User accounts: Optional backend (Firebase) for cloud sync.
+Analytics: Track average WPM, completion rates.
+Export: Save progress as bookmark.
+
+This spec provides all necessary details to build the app. Use it as a prompt for code generation, ensuring the final product mimics the described RSVP focus reading experience.
+
